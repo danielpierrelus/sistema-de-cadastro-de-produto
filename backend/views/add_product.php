@@ -1,62 +1,78 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-    header('Location: login.php');
+
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
     exit;
 }
 
-include_once 'config/database.php';
-include_once 'models/Product.php';
+require_once '../config/database.php';
 
-$database = new Database();
-$db = $database->getConnection();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
+    $image = ''; // Implementar o upload de imagem se necessário
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $product = new Product($db);
-    $product->name = $_POST['name'];
-    $product->description = $_POST['description'];
-    $product->image = $_FILES['image']['name'];
-    $product->price = $_POST['price'];
+    try {
+        $stmt = $conn->prepare("INSERT INTO products (name, description, price, image) VALUES (:name, :description, :price, :image)");
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':image', $image);
+        $stmt->execute();
 
-    if ($product->create()) {
-        move_uploaded_file($_FILES['image']['tmp_name'], '../images/' . $_FILES['image']['name']);
-        header('Location: products.php');
-    } else {
-        $error = "Erro ao adicionar produto";
+        header("Location: products.php");
+        exit;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Novo Produto</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.3.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Produto</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+        .form-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="my-4">Novo Produto</h1>
-        <?php if (isset($error)) { echo "<div class='alert alert-danger'>$error</div>"; } ?>
-        <form method="POST" enctype="multipart/form-data">
+    <div class="form-container">
+        <h2>Adicionar Produto</h2>
+        <form action="add_product.php" method="post">
             <div class="form-group">
-                <label for="name">Nome:</label>
-                <input type="text" name="name" class="form-control" required>
+                <label for="name">Nome do Produto</label>
+                <input type="text" class="form-control" id="name" name="name" required>
             </div>
             <div class="form-group">
-                <label for="description">Descrição:</label>
-                <textarea name="description" class="form-control" required></textarea>
+                <label for="description">Descrição</label>
+                <textarea class="form-control" id="description" name="description" required></textarea>
             </div>
             <div class="form-group">
-                <label for="image">Imagem:</label>
-                <input type="file" name="image" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="price">Preço:</label>
-                <input type="number" step="0.01" name="price" class="form-control" required>
+                <label for="price">Preço</label>
+                <input type="number" class="form-control" id="price" name="price" step="0.01" required>
             </div>
             <button type="submit" class="btn btn-primary">Adicionar</button>
         </form>
     </div>
 </body>
 </html>
-

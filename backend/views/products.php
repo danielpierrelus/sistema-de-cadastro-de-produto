@@ -1,57 +1,70 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-    header('Location: login.php');
+
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
     exit;
 }
 
-include_once 'config/database.php';
-include_once 'models/Product.php';
+require_once '../config/database.php';
 
-$database = new Database();
-$db = $database->getConnection();
-
-$product = new Product($db);
-$query = "SELECT * FROM products";
-$stmt = $db->prepare($query);
-$stmt->execute();
+try {
+    $stmt = $conn->prepare("SELECT * FROM products");
+    $stmt->execute();
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Gerenciar Produtos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.3.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .product-container {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="my-4">Gerenciar Produtos</h1>
-        <a href="add_product.php" class="btn btn-success mb-4">Novo Produto</a>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Imagem</th>
-                    <th>Nome</th>
-                    <th>Descrição</th>
-                    <th>Preço</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) { ?>
+    <h2>Produtos</h2>
+    <a href="add_product.php" class="btn btn-primary mb-3">Adicionar Produto</a>
+    <div class="product-container">
+        <?php if ($products): ?>
+            <table class="table table-striped">
+                <thead>
                     <tr>
-                        <td><img src="<?php echo '../images/' . $row['image']; ?>" class="table-img" alt="<?php echo $row['name']; ?>"></td>
-                        <td><?php echo $row['name']; ?></td>
-                        <td><?php echo $row['description']; ?></td>
-                        <td>R$ <?php echo number_format($row['price'], 2, ',', '.'); ?></td>
-                        <td>
-                            <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="btn btn-warning">Editar</a>
-                            <a href="delete_product.php?id=<?php echo $row['id']; ?>" class="btn btn-danger">Excluir</a>
-                        </td>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Preço</th>
+                        <th>Ações</th>
                     </tr>
-                <?php } ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($products as $product): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($product['name']); ?></td>
+                            <td><?php echo htmlspecialchars($product['description']); ?></td>
+                            <td><?php echo htmlspecialchars($product['price']); ?></td>
+                            <td>
+                                <a href="edit_product.php?id=<?php echo $product['id']; ?>" class="btn btn-warning">Editar</a>
+                                <a href="delete_product.php?id=<?php echo $product['id']; ?>" class="btn btn-danger">Excluir</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p>Nenhum produto encontrado.</p>
+        <?php endif; ?>
     </div>
 </body>
 </html>

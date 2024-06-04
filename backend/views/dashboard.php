@@ -1,38 +1,57 @@
 <?php
 session_start();
-if (!isset($_SESSION['loggedin'])) {
-    header('Location: login.php');
+
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
     exit;
 }
 
-include_once 'config/database.php';
-include_once 'models/Product.php';
+require_once '../config/database.php';
 
-$database = new Database();
-$db = $database->getConnection();
-
-$product = new Product($db);
-$query = "SELECT COUNT(*) as total_products FROM products";
-$stmt = $db->prepare($query);
-$stmt->execute();
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-$total_products = $row['total_products'];
+// Contar o número de produtos no banco de dados
+try {
+    $stmt = $conn->prepare("SELECT COUNT(*) AS product_count FROM products");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $product_count = $result['product_count'];
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+    exit;
+}
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+        .dashboard-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .dashboard-container h2 {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="my-4">Dashboard</h1>
-        <div class="alert alert-info">
-            <strong>Total de Produtos:</strong> <?php echo $total_products; ?>
-        </div>
-        <a href="products.php" class="btn btn-primary">Gerenciar Produtos</a>
+    <div class="dashboard-container">
+        <h2>Bem-vindo, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
+        <p>Quantidade de produtos cadastrados: <?php echo $product_count; ?></p>
+        <a href="logout.php" class="btn btn-danger">Logout</a>
     </div>
 </body>
 </html>
