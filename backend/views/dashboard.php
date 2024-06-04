@@ -18,7 +18,11 @@ try {
     echo "Error: " . $e->getMessage();
     exit;
 }
+
+
+include 'layout.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
