@@ -15,32 +15,69 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $image = '';
 
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $upload_dir = '../uploads/';
+        // Especificando o caminho absoluto diretamente
+        $upload_dir = '/var/www/html/sistema-de-cadastro-de-produto/uploads/';
+        echo "Upload directory: $upload_dir<br>";
         $image_path = $upload_dir . basename($_FILES['image']['name']);
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
-            $image = 'uploads/' . basename($_FILES['image']['name']); // Save relative path
+        echo "Full image path: $image_path<br>";
+        $imageFileType = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
+
+        // Verificar se o arquivo é uma imagem real ou falsa
+        $check = getimagesize($_FILES['image']['tmp_name']);
+        if ($check !== false) {
+            // Verificar se o arquivo já existe
+            if (!file_exists($image_path)) {
+                // Verificar o tamanho do arquivo
+                if ($_FILES['image']['size'] <= 500000) {
+                    // Permitir certos formatos de arquivo
+                    if (in_array($imageFileType, ['jpg', 'png', 'jpeg', 'gif'])) {
+                        // Debugging the file path
+                        echo "Trying to move uploaded file to: $image_path<br>";
+                        if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+                            $image = 'uploads/' . basename($_FILES['image']['name']); // Save relative path
+                            echo "Imagem carregada com sucesso: $image_path <br>";
+                        } else {
+                            echo "Erro ao fazer upload da imagem. Verifique as permissões da pasta de destino.<br>";
+                        }
+                    } else {
+                        echo "Desculpe, apenas arquivos JPG, JPEG, PNG & GIF são permitidos. <br>";
+                    }
+                } else {
+                    echo "Desculpe, o arquivo é muito grande. <br>";
+                }
+            } else {
+                echo "Desculpe, o arquivo já existe. <br>";
+            }
         } else {
-            echo "Erro ao fazer upload da imagem.";
+            echo "O arquivo não é uma imagem. <br>";
         }
     } else {
-        echo "Erro no upload do arquivo: " . $_FILES['image']['error'];
+        echo "Erro no upload do arquivo: " . $_FILES['image']['error'] . "<br>";
     }
 
-    try {
-        $stmt = $conn->prepare("INSERT INTO products (name, description, image, price) VALUES (:name, :description, :image, :price)");
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':description', $description);
-        $stmt->bindParam(':image', $image);
-        $stmt->bindParam(':price', $price);
-        $stmt->execute();
+    // Debugging outputs
+    var_dump($name, $description, $price, $image);
 
-        header("Location: products.php");
-        exit;
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+    if ($image) {
+        try {
+            $stmt = $conn->prepare("INSERT INTO products (name, description, image, price) VALUES (:name, :description, :image, :price)");
+            $stmt->bindParam(':name', $name);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':image', $image);
+            $stmt->bindParam(':price', $price);
+            $stmt->execute();
+
+            header("Location: products.php");
+            exit;
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+    } else {
+        echo "Imagem não foi carregada. <br>";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

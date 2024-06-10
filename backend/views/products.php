@@ -81,11 +81,14 @@ $title = "Produtos";
         <h2 class="mb-4">Produtos</h2>
         <a href="add_product.php" class="btn btn-primary mb-4">Adicionar Produto</a>
         <div class="row">
-            <?php if ($products): ?>
+            <?php if (!empty($products)): ?>
                 <?php foreach ($products as $product): ?>
                     <div class="col-md-4">
                         <div class="card product-card">
-                            <img src="../<?php echo htmlspecialchars($product['image']); ?>" class="card-img-top" alt="Product Image">
+                            <!-- Use caminho absoluto para depuração -->
+                            <img src="<?php echo htmlspecialchars($product['image']); ?>" class="card-img-top" alt="Product Image">
+
+                            <p><?php echo '' . htmlspecialchars(basename($product['image'])); ?></p> <!-- Caminho da Imagem para Debug -->
                             <div class="card-body">
                                 <h5 class="card-title"><?php echo htmlspecialchars($product['name']); ?></h5>
                                 <p class="card-text"><?php echo htmlspecialchars($product['description']); ?></p>
