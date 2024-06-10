@@ -55,7 +55,7 @@ Este é um sistema simples de cadastro de produtos com uma tela de Login para a 
 
 ## Como Rodar o Projeto
 1. Abra o navegador e vá para `http://localhost/sistema-de-cadastro-de-produto/backend/views/login.php` para acessar a parte administrativa.
-2. Vá para `http://localhost/sistema-de-cadastro-de-produto/frontend/index.php` para ver a listagem dos produtos no front-end.
+
 
 ## Funcionalidades
 - Tela de Login
