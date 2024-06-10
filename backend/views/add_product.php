@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         // Especificando o caminho absoluto diretamente
-        $upload_dir = '/var/www/html/sistema-de-cadastro-de-produto/uploads/';
+        $upload_dir = '/var/www/html/sistema-de-cadastro-de-produto/backend/views/uploads/';
         echo "Upload directory: $upload_dir<br>";
         $image_path = $upload_dir . basename($_FILES['image']['name']);
         echo "Full image path: $image_path<br>";

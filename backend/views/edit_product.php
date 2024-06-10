@@ -16,7 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $image = $_POST['current_image'];
 
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $upload_dir = '../uploads/';
+        //$upload_dir = '../uploads/';
+        $upload_dir = '/var/www/html/sistema-de-cadastro-de-produto/backend/views/uploads/';
         $image_path = $upload_dir . basename($_FILES['image']['name']);
         if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
             $image = 'uploads/' . basename($_FILES['image']['name']); // Save relative path
@@ -100,7 +101,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <label for="image">Imagem do Produto</label>
                 <input type="file" class="form-control-file" id="image" name="image">
-                <img src="../<?php echo htmlspecialchars($product['image']); ?>" alt="Product Image" width="100">
+                
+                <img src="<?php echo htmlspecialchars($product['image']); ?>" class="card-img-top" alt="Product Image">
             </div>
             <button type="submit" class="btn btn-primary">Salvar Alterações</button>
         </form>
