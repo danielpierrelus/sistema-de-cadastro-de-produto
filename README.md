@@ -23,7 +23,7 @@ Este é um sistema simples de cadastro de produtos com uma tela de Login para a 
 2. Clone o repositório do GitHub:
     ```bash
     cd /var/www/html
-    sudo git clone https://github.com/seu-usuario/sistema-de-cadastro-de-produto.git
+    sudo git clone https://github.com/danielpierrelus/sistema-de-cadastro-de-produto.git
     sudo chown -R www-data:www-data /var/www/html/sistema-de-cadastro-de-produto
     sudo chmod -R 755 /var/www/html/sistema-de-cadastro-de-produto
     ```
